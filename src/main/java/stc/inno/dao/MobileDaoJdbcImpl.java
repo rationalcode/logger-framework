@@ -1,5 +1,10 @@
 package stc.inno.dao;
 
+
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.bridge.SLF4JBridgeHandler;
 import stc.inno.ConnectionManager.ConnectionManager;
 import stc.inno.pojo.Mobile;
 
@@ -8,9 +13,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.logging.Level;
+
 
 public class MobileDaoJdbcImpl implements MobileDao {
-    public static final String INSERT_INTO_MOBILE = "INSERT INTO mobile values (DEFAULT, ?, ?, ?)";
+    Logger logger = LoggerFactory.getLogger(this.getClass());
+     public static final String INSERT_INTO_MOBILE = "INSERT INTO mobile values (DEFAULT, ?, ?, ?)";
     public static final String SELECT_FROM_MOBILE = "SELECT * FROM mobile WHERE id = ?";
     public static final String UPDATE_MOBILE      = "UPDATE mobile SET model=?, price=?, manufacturer=? WHERE id=?";
     public static final String DELETE_FROM_MOBILE = "DELETE FROM mobile WHERE id=?";
@@ -19,11 +27,15 @@ public class MobileDaoJdbcImpl implements MobileDao {
     private final ConnectionManager connectionManager;
 
     public MobileDaoJdbcImpl(ConnectionManager connectionManager) {
+        SLF4JBridgeHandler.removeHandlersForRootLogger();
+        SLF4JBridgeHandler.install();
+        java.util.logging.Logger.getLogger("").setLevel(Level.FINEST);
         this.connectionManager = connectionManager;
     }
 
     @Override
     public Long addMobile(Mobile mobile) {
+        logger.trace("addMobile {}", mobile);
         try (Connection connection = connectionManager.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(INSERT_INTO_MOBILE, Statement.RETURN_GENERATED_KEYS)) {
             preparedStatement.setString(1, mobile.getModel());
@@ -38,13 +50,14 @@ public class MobileDaoJdbcImpl implements MobileDao {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error("addMobile" , e);
         }
         return 0L;
     }
 
     @Override
     public Mobile getMobileById(Long id) {
+        logger.info("getMobileById");
         try (Connection connection = connectionManager.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(SELECT_FROM_MOBILE)) {
             preparedStatement.setLong(1, id);
@@ -58,14 +71,14 @@ public class MobileDaoJdbcImpl implements MobileDao {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error("getMobileById" , e);
         }
         return null;
     }
 
     @Override
     public boolean updateMobileById(Mobile mobile) {
-
+        logger.info("updateMobileById");
         try (Connection connection = connectionManager.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_MOBILE)) {
             preparedStatement.setString(1, mobile.getModel());
@@ -75,19 +88,20 @@ public class MobileDaoJdbcImpl implements MobileDao {
             preparedStatement.execute();
             return true;
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error("updateMobileById" , e);
         }
         return false;
     }
 
     @Override
     public boolean deleteMobileById(Long id) {
+        logger.info("deleteMobileById");
         try (Connection connection = connectionManager.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(DELETE_FROM_MOBILE)) {
             preparedStatement.setLong(1, id);
             preparedStatement.execute();
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error("deleteMobileById" , e);
             return false;
         }
         return true;

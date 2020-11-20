@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+  <Appenders>
+    <File name="file" fileName="logs/log4j/log.log">
+      <PatternLayout>
+        <Pattern>%d %p %c{1.} [%t] %m %ex%n</Pattern>
+      </PatternLayout>
+    </File>
+    <File name="file2" fileName="logs/log4j/log2.log">
+      <MarkerFilter marker="consoleonly" onMatch="DENY" onMismatch="ACCEPT"/>
+      <PatternLayout>
+        <Pattern>%d %p %c{1.} [%t] %m %ex%n</Pattern>
+      </PatternLayout>
+    </File>
+    <Console name="stdout" target="SYSTEM_OUT">
+      <PatternLayout pattern="%m%n"/>
+    </Console>
+    <JDBC name="db" tableName="APP_LOGS">
+      <DriverManager connectionString="jdbc:postgresql://127.0.0.1:5434/jdbcDB" driverClassName="org.postgresql.Driver"
+                     username="postgres" password="qwerty"/>
+      <Column name="LOG_ID" pattern="%u" isUnicode="false"/>
+      <Column name="ENTRY_DATE" isEventTimestamp="true" isUnicode="false"/>
+      <Column name="LOGGER" pattern="%logger" isUnicode="false"/>
+      <Column name="LOG_LEVEL" pattern="%level" isUnicode="false"/>
+      <Column name="MESSAGE" pattern="%m" isUnicode="false"/>
+      <Column name="EXCEPTION" pattern="%throwable " isUnicode="false"/>
+    </JDBC>
+
+  </Appenders>
+  <Loggers>
+    <Root level="trace">
+      <AppenderRef ref="file" level="DEBUG"/>
+      <AppenderRef ref="stdout" level="INFO"/>
+    </Root>
+    <Logger name="stc.inno.dao.MobileDaoJdbcImpl" level="info" additivity="false">
+      <AppenderRef ref="file2" level="INFO"/>
+      <AppenderRef ref="stdout" level="INFO"/>
+      <AppenderRef ref="db" level="INFO"/>
+    </Logger>
+  </Loggers>
+</Configuration>

@@ -16,6 +16,7 @@ public class ConnectionManagerJdbcImpl implements ConnectionManager {
 
     @Override
     public Connection getConnection() {
+
         Connection connection = null;
         try {
             connection = DriverManager.getConnection(
